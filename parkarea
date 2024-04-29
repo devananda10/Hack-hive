@@ -146,28 +146,44 @@ class _BookingPageState extends State<BookingPage> {
           ElevatedButton(
             onPressed: () {
               // Implement ticket booking logic here
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: Text('Success'),
-                    content: Text('Slots are booked successfully!'),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: Text('Close'),
-                      ),
-                    ],
-                  );
-                },
-              );
+              _showFeedbackDialog(context);
             },
             child: Text('Confirm Booking'),
           ),
         ],
       ),
+    );
+  }
+
+  void _showFeedbackDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Feedback'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text('Please provide feedback about your parking experience:'),
+              TextField(
+                decoration: InputDecoration(labelText: 'Comments'),
+                onChanged: (value) {
+                  // Handle feedback comments
+                },
+              ),
+              // Your rating widget here (e.g., star rating)
+            ],
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Submit'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -178,4 +194,3 @@ class ParkingArea {
 
   ParkingArea({required this.name, required this.availableSlots});
 }
-
