@@ -42,7 +42,7 @@ class ParkingListingPage extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) =>
-                      MovieDetailsPage(movie: parkingAreas[index]),
+                      ParkingDetailsPage(parking: parkingAreas[index]),
                 ),
               );
             },
@@ -53,28 +53,28 @@ class ParkingListingPage extends StatelessWidget {
   }
 }
 
-class MovieDetailsPage extends StatelessWidget {
-  final ParkingArea movie;
+class ParkingDetailsPage extends StatelessWidget {
+  final ParkingArea parking;
 
-  MovieDetailsPage({required this.movie});
+  ParkingDetailsPage({required this.parking});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(movie.name),
+        title: Text(parking.name),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('AvailableSlots: ${movie.availableSlots}'),
+            Text('AvailableSlots: ${parking.availableSlots}'),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => BookingPage(movie: movie),
+                    builder: (context) => BookingPage(parking: parking),
                   ),
                 );
               },
@@ -88,9 +88,9 @@ class MovieDetailsPage extends StatelessWidget {
 }
 
 class BookingPage extends StatefulWidget {
-  final ParkingArea movie;
+  final ParkingArea parking;
 
-  BookingPage({required this.movie});
+  BookingPage({required this.parking});
 
   @override
   _BookingPageState createState() => _BookingPageState();
@@ -98,6 +98,14 @@ class BookingPage extends StatefulWidget {
 
 class _BookingPageState extends State<BookingPage> {
   List<String> selectedSeats = [];
+  int length = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize length after widget is fully initialized
+    length = int.parse(widget.parking.availableSlots.toString());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,12 +115,12 @@ class _BookingPageState extends State<BookingPage> {
       ),
       body: Column(
         children: [
-          Text('Selected Parking Area: ${widget.movie.name}'),
+          Text('Selected Parking Area: ${widget.parking.name}'),
           Text('Select your slots:'),
           GridView.count(
             crossAxisCount: 5,
             shrinkWrap: true,
-            children: List.generate(20, (index) {
+            children: List.generate(length, (index) {
               final seatNumber = index + 1;
               return GestureDetector(
                 onTap: () {
@@ -164,10 +172,10 @@ class _BookingPageState extends State<BookingPage> {
   }
 }
 
-
 class ParkingArea {
   final String name;
   final int availableSlots;
 
   ParkingArea({required this.name, required this.availableSlots});
 }
+
