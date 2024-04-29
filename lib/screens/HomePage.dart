@@ -1,0 +1,209 @@
+import 'package:flutter/material.dart';
+import 'package:login_register_app/utils/common_widgets/gradient_background.dart';
+
+void main() {
+  runApp(ParkEase());
+}
+
+class ParkEase extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'ParkEase',
+      theme: ThemeData(
+        primarySwatch: Colors.lightGreen,
+      ),
+      home: ParkingListingPage(),
+    );
+  }
+}
+
+class ParkingListingPage extends StatelessWidget {
+  final List<ParkingArea> parkingAreas = [
+    ParkingArea(name: 'Parking Area 1', availableSlots: 20),
+    ParkingArea(name: 'Parking Area 2', availableSlots: 15),
+    ParkingArea(name: 'Parking Area 3', availableSlots: 10),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Color.fromARGB(255, 0, 19, 39),
+        title: Text(
+          'ParkingAreas',
+          style: TextStyle(
+            color: Colors.white70,
+          ),
+        ),
+      ),
+      body: ListView.builder(
+        itemCount: parkingAreas.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(parkingAreas[index].name),
+            subtitle:
+                Text('Available Slots: ${parkingAreas[index].availableSlots}'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      ParkingDetailsPage(parking: parkingAreas[index]),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class ParkingDetailsPage extends StatelessWidget {
+  final ParkingArea parking;
+
+  ParkingDetailsPage({required this.parking});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+          backgroundColor: Color.fromARGB(255, 0, 19, 39),
+          title: Text(parking.name,
+              style: TextStyle(
+                color: Colors.white70,
+              ))),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('AvailableSlots: ${parking.availableSlots}'),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BookingPage(parking: parking),
+                  ),
+                );
+              },
+              child: Text('Book Your Slot'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class BookingPage extends StatefulWidget {
+  final ParkingArea parking;
+
+  BookingPage({required this.parking});
+
+  @override
+  _BookingPageState createState() => _BookingPageState();
+}
+
+class _BookingPageState extends State<BookingPage> {
+  List<String> selectedSeats = [];
+  int length = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize length after widget is fully initialized
+    length = int.parse(widget.parking.availableSlots.toString());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+          backgroundColor: Color.fromARGB(255, 0, 19, 39),
+          title: Text('Book Slots',
+              style: TextStyle(
+                color: Colors.white70,
+              ))),
+      body: Column(
+        children: [
+          Text('Selected Parking Area: ${widget.parking.name}'),
+          Text('Select your slots:'),
+          GridView.count(
+            crossAxisCount: 5,
+            shrinkWrap: true,
+            children: List.generate(length, (index) {
+              final seatNumber = index + 1;
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    final seat = 'Slot $seatNumber';
+                    if (selectedSeats.contains(seat)) {
+                      selectedSeats.remove(seat);
+                    } else {
+                      selectedSeats.add(seat);
+                    }
+                  });
+                },
+                child: Container(
+                  margin: EdgeInsets.all(5),
+                  color: selectedSeats.contains('Slot $seatNumber')
+                      ? Colors.red
+                      : Colors.green,
+                  child: Center(child: Text('Slot $seatNumber')),
+                ),
+              );
+            }),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              // Implement ticket booking logic here
+              _showFeedbackDialog(context);
+            },
+            child: Text('Confirm Booking'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showFeedbackDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Feedback'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text('Please provide feedback about your parking experience:'),
+              TextField(
+                decoration: InputDecoration(labelText: 'Comments'),
+                onChanged: (value) {
+                  // Handle feedback comments
+                },
+              ),
+              // Your rating widget here (e.g., star rating)
+            ],
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Submit'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class ParkingArea {
+  final String name;
+  final int availableSlots;
+
+  ParkingArea({required this.name, required this.availableSlots});
+}
