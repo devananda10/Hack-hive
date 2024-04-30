@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:login_register_app/utils/common_widgets/gradient_background.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 void main() {
   runApp(ParkEase());
@@ -107,6 +107,7 @@ class BookingPage extends StatefulWidget {
 }
 
 class _BookingPageState extends State<BookingPage> {
+  Razorpay _razorpay = Razorpay();
   List<String> selectedSeats = [];
   int length = 0;
 
@@ -115,6 +116,53 @@ class _BookingPageState extends State<BookingPage> {
     super.initState();
     // Initialize length after widget is fully initialized
     length = int.parse(widget.parking.availableSlots.toString());
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _razorpay.clear();
+  }
+
+  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    // Payment successful, handle success logic here
+    print("Payment Success: ${response.paymentId}");
+    // Display success message or navigate to next screen
+    _showSuccessDialog(context);
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    // Payment failed, handle failure logic here
+    print("Payment Error: ${response.code.toString()} - ${response.message}");
+    // Display error message or try payment again
+    _showErrorDialog(context);
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    // Handle external wallet payment (e.g., PayTM, Google Pay)
+    print("External Wallet: ${response.walletName}");
+  }
+
+  void _openCheckout() {
+    var options = {
+      'key': 'rzp_test_Sl3dOkXD2bsnlP',
+      'amount': 10000, // Amount in smallest currency unit (e.g., cents)
+      'name': 'ParkEase',
+      'description': 'Slot Booking',
+      'prefill': {'contact': '9876543210', 'email': 'example@example.com'},
+      'external': {
+        'wallets': ['paytm'],
+      }
+    };
+
+    try {
+      _razorpay.open(options);
+    } catch (e) {
+      print("Error: $e");
+    }
   }
 
   @override
@@ -159,7 +207,7 @@ class _BookingPageState extends State<BookingPage> {
           ElevatedButton(
             onPressed: () {
               // Implement ticket booking logic here
-              _showFeedbackDialog(context);
+              _openCheckout();
             },
             child: Text('Confirm Booking'),
           ),
@@ -168,31 +216,39 @@ class _BookingPageState extends State<BookingPage> {
     );
   }
 
-  void _showFeedbackDialog(BuildContext context) {
+  void _showSuccessDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Feedback'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text('Please provide feedback about your parking experience:'),
-              TextField(
-                decoration: InputDecoration(labelText: 'Comments'),
-                onChanged: (value) {
-                  // Handle feedback comments
-                },
-              ),
-              // Your rating widget here (e.g., star rating)
-            ],
-          ),
+          title: Text('Success'),
+          content: Text('Your booking is confirmed!'),
           actions: [
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Submit'),
+              child: Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showErrorDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Error'),
+          content: Text('Payment failed. Please try again.'),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Close'),
             ),
           ],
         );

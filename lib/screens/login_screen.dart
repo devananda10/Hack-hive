@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:login_register_app/utils/helpers/snackbar_helper.dart';
 import 'package:login_register_app/values/app_regex.dart';
-
 import '../components/app_text_form_field.dart';
 import '../resources/resources.dart';
 import '../utils/common_widgets/gradient_background.dart';
